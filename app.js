@@ -1,5 +1,7 @@
 'use strict';
 
+const APP_VERSION = 'v0.2.1';
+
 // ---------------------------------------------------------------------------
 // Musik-Konstanten (aus der Videoanalyse, siehe docs/ANALYSE.md)
 // ---------------------------------------------------------------------------
@@ -519,9 +521,10 @@ function loadFromUrl() {
 async function share() {
   syncUrl();
   const url = drawingUrl();
+  // navigator.share muss direkt im Klick laufen, sonst blockiert iOS es
   if (navigator.share) {
     try {
-      await navigator.share({ title: 'Music Drawer', text: 'Hör dir meine Zeichnung an', url });
+      await navigator.share({ title: 'Music Drawer', url });
       return;
     } catch (e) {
       if (e.name === 'AbortError') return;
@@ -531,8 +534,17 @@ async function share() {
     await navigator.clipboard.writeText(url);
     toast('Link kopiert');
   } catch (e) {
-    prompt('Link zum Kopieren:', url);
+    showLinkPanel(url);
   }
+}
+
+// Rückfall, wenn weder Teilen-Menü noch Zwischenablage erlaubt sind
+// (z. B. In-App-Browser): Link sichtbar und markierbar anzeigen
+function showLinkPanel(url) {
+  ui.linkInput.value = url;
+  ui.linkPanel.hidden = false;
+  ui.linkInput.focus();
+  ui.linkInput.setSelectionRange(0, url.length);
 }
 
 let toastTimer = 0;
@@ -556,6 +568,8 @@ const ui = {
   instName: document.getElementById('instName'),
   instFx: document.getElementById('instFx'),
   toast: document.getElementById('toast'),
+  linkPanel: document.getElementById('linkPanel'),
+  linkInput: document.getElementById('linkInput'),
 };
 const g2d = ui.canvas.getContext('2d');
 let W = 0, H = 0, DPR = 1;
@@ -679,6 +693,13 @@ document.getElementById('play').addEventListener('click', () => setPlaying(!stat
 document.getElementById('undo').addEventListener('click', () => { state.strokes.pop(); syncUrl(); });
 document.getElementById('clear').addEventListener('click', () => { state.strokes = []; stopAllVoices(); syncUrl(); });
 document.getElementById('share').addEventListener('click', share);
+document.getElementById('linkClose').addEventListener('click', () => { ui.linkPanel.hidden = true; });
+document.getElementById('linkCopy').addEventListener('click', () => {
+  ui.linkInput.setSelectionRange(0, ui.linkInput.value.length);
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) {}
+  toast(ok ? 'Link kopiert' : 'Link markiert – bitte manuell kopieren');
+});
 document.getElementById('slower').addEventListener('click', () => { setBpm(state.bpm - 5); syncUrl(); });
 document.getElementById('faster').addEventListener('click', () => { setBpm(state.bpm + 5); syncUrl(); });
 
@@ -712,6 +733,7 @@ window.addEventListener('hashchange', () => {
   if (location.href !== drawingUrl()) loadFromUrl();
 });
 
+document.getElementById('version').textContent = `${APP_VERSION} Prototyp · Music Drawer`;
 selectInstrument(state.inst, false);
 if (loadFromUrl()) ui.hint.textContent = 'Tippe ▶ zum Anhören';
 resize();
