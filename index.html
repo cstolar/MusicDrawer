@@ -6,13 +6,18 @@
   <meta name="theme-color" content="#f6f4f1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Music Drawer</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=0.2.1">
 </head>
 <body>
   <main id="app">
     <div id="stage">
       <canvas id="canvas"></canvas>
       <div id="toast"></div>
+      <div id="linkPanel" hidden>
+        <input id="linkInput" readonly aria-label="Link zur Zeichnung">
+        <button id="linkCopy" class="btn small" aria-label="Kopieren">⧉</button>
+        <button id="linkClose" class="btn small" aria-label="Schließen">✕</button>
+      </div>
       <div id="hint">Male eine Linie – der Strich wird zur Melodie</div>
     </div>
 
@@ -35,8 +40,8 @@
         <span id="instFx"></span>
       </div>
     </div>
-    <footer>v0.2 Prototyp · Music Drawer</footer>
+    <footer id="version">Music Drawer</footer>
   </main>
-  <script src="app.js"></script>
+  <script src="app.js?v=0.2.1"></script>
 </body>
 </html>

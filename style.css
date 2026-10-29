@@ -134,3 +134,29 @@ footer {
   transition: opacity .2s, transform .2s;
 }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+#linkPanel {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 22px;
+  background: var(--btn);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
+}
+#linkPanel[hidden] { display: none; }
+#linkInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 0 12px;
+  font-size: 16px; /* verhindert Auto-Zoom auf iOS */
+  color: var(--ink);
+  -webkit-user-select: text;
+  user-select: text;
+}
