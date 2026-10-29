@@ -118,3 +118,19 @@ footer {
   font-size: 11px;
   color: var(--muted);
 }
+
+#toast {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translate(-50%, -8px);
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s, transform .2s;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }

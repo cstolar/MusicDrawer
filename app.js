@@ -63,12 +63,14 @@ const INSTRUMENTS = [
     reverb: 0.2,
   },
   {
-    name: 'Bass', color: '#2f45c4', fx: 'Oktave tiefer · Sub-Sinus · Lowpass · Sättigung',
-    oscs: [{ type: 'triangle', ratio: 1, gain: 0.9 }, { type: 'sine', ratio: 0.5, gain: 0.7 }],
-    env: { a: 0.008, d: 0.25, s: 0.8, r: 0.12 }, glide: 0.04, octave: -12, gain: 0.45,
+    name: 'Bass', color: '#2f45c4', fx: 'Zwei Oktaven tiefer · Sinus + Dreieck · Röhren-Sättigung · dunkler Lowpass',
+    // Grundton 2 Oktaven tiefer; die Sättigung erzeugt Obertöne, damit der
+    // Bass auch auf Handy-Lautsprechern als Tonhöhe hörbar bleibt.
+    oscs: [{ type: 'sine', ratio: 1, gain: 1 }, { type: 'triangle', ratio: 1, gain: 0.45 }],
+    env: { a: 0.008, d: 0.3, s: 0.85, r: 0.15 }, glide: 0.05, octave: -24, gain: 0.35,
     inserts: [
-      { fx: 'filter', type: 'lowpass', freq: 650, q: 3 },
-      { fx: 'drive', amount: 2 },
+      { fx: 'drive', amount: 3 },
+      { fx: 'filter', type: 'lowpass', freq: 420, q: 4 },
     ],
     reverb: 0.04,
   },
@@ -381,6 +383,7 @@ function setPlaying(on) {
     stopAllVoices();
   }
   state.playing = on;
+  if (on) ui.hint.classList.add('hidden');
   ui.play.textContent = on ? '❚❚' : '▶';
   ui.play.classList.toggle('active', on);
 }
@@ -431,6 +434,116 @@ function updateVoices(hits) {
 }
 
 // ---------------------------------------------------------------------------
+// Teilen: die Zeichnung steckt komplett im URL-Hash, kein Server nötig.
+//   Format:  #d=<bpm>-<base64url>
+//   Binär:   [Version=1] dann je Strich: [Farbe 1B][Punktzahl 2B][Punkte à 3B]
+//            Punkt = x (12 Bit) | y (12 Bit), also 4096 Stufen je Achse.
+// ---------------------------------------------------------------------------
+const Q = 4095;
+const quantize = (v) => Math.round(Math.min(1, Math.max(0, v)) * Q) / Q;
+
+// Ramer-Douglas-Peucker: entfernt Punkte, die kaum von der Linie abweichen
+function simplify(pts, eps) {
+  if (pts.length < 3) return pts;
+  const a = pts[0], b = pts[pts.length - 1];
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const len = Math.hypot(dx, dy) || 1e-9;
+  let maxD = 0, idx = 0;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const d = Math.abs(dy * pts[i].x - dx * pts[i].y + b.x * a.y - b.y * a.x) / len;
+    if (d > maxD) { maxD = d; idx = i; }
+  }
+  if (maxD <= eps) return [a, b];
+  return simplify(pts.slice(0, idx + 1), eps).slice(0, -1).concat(simplify(pts.slice(idx), eps));
+}
+
+function encodeDrawing(strokes) {
+  const bytes = [1];
+  for (const s of strokes) {
+    const n = Math.min(s.pts.length, 0xffff);
+    bytes.push(s.inst, n >> 8, n & 0xff);
+    for (let i = 0; i < n; i++) {
+      const x = Math.round(s.pts[i].x * Q), y = Math.round(s.pts[i].y * Q);
+      bytes.push(x >> 4, ((x & 0xf) << 4) | (y >> 8), y & 0xff);
+    }
+  }
+  let bin = '';
+  for (const v of bytes) bin += String.fromCharCode(v);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function decodeDrawing(str) {
+  const bin = atob(str.replace(/-/g, '+').replace(/_/g, '/'));
+  const b = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  if (b[0] !== 1) throw new Error('Unbekannte Version');
+  const strokes = [];
+  let i = 1;
+  while (i + 3 <= b.length) {
+    const inst = b[i], n = (b[i + 1] << 8) | b[i + 2];
+    i += 3;
+    if (inst >= INSTRUMENTS.length || i + n * 3 > b.length) throw new Error('Ungültige Daten');
+    const pts = [];
+    for (let k = 0; k < n; k++, i += 3) {
+      pts.push({ x: ((b[i] << 4) | (b[i + 1] >> 4)) / Q, y: (((b[i + 1] & 0xf) << 8) | b[i + 2]) / Q });
+    }
+    if (pts.length > 1) strokes.push({ id: nextId++, inst, pts });
+  }
+  return strokes;
+}
+
+function drawingUrl() {
+  const base = location.href.split('#')[0];
+  return state.strokes.length ? `${base}#d=${state.bpm}-${encodeDrawing(state.strokes)}` : base;
+}
+
+// Adresszeile immer aktuell halten: Neuladen oder URL kopieren behält die Zeichnung
+function syncUrl() {
+  history.replaceState(null, '', drawingUrl());
+}
+
+function loadFromUrl() {
+  const m = location.hash.match(/^#d=(\d{2,3})-([A-Za-z0-9_-]*)$/);
+  if (!m) return false;
+  try {
+    const strokes = decodeDrawing(m[2]);
+    stopAllVoices();
+    state.strokes = strokes;
+    setBpm(parseInt(m[1], 10));
+    return strokes.length > 0;
+  } catch (e) {
+    console.warn('Link konnte nicht gelesen werden:', e);
+    return false;
+  }
+}
+
+async function share() {
+  syncUrl();
+  const url = drawingUrl();
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'Music Drawer', text: 'Hör dir meine Zeichnung an', url });
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    toast('Link kopiert');
+  } catch (e) {
+    prompt('Link zum Kopieren:', url);
+  }
+}
+
+let toastTimer = 0;
+function toast(text) {
+  ui.toast.textContent = text;
+  ui.toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => ui.toast.classList.remove('show'), 1800);
+}
+
+// ---------------------------------------------------------------------------
 // Darstellung
 // ---------------------------------------------------------------------------
 const ui = {
@@ -442,6 +555,7 @@ const ui = {
   palette: document.getElementById('palette'),
   instName: document.getElementById('instName'),
   instFx: document.getElementById('instFx'),
+  toast: document.getElementById('toast'),
 };
 const g2d = ui.canvas.getContext('2d');
 let W = 0, H = 0, DPR = 1;
@@ -548,18 +662,25 @@ ui.canvas.addEventListener('pointermove', (e) => {
 
 function endStroke() {
   if (!state.current) return;
-  if (state.current.pts.length > 1) state.strokes.push(state.current);
+  const s = state.current;
   state.current = null;
+  if (s.pts.length > 1) {
+    // ~1,5 px Toleranz; gespeichert wird exakt das, was auch im Link landet
+    s.pts = simplify(s.pts, 1.5 / ui.stage.clientWidth).map((p) => ({ x: quantize(p.x), y: quantize(p.y) }));
+    state.strokes.push(s);
+    syncUrl();
+  }
   if (previewVoice) { previewVoice.stop(); previewVoice = null; }
 }
 ui.canvas.addEventListener('pointerup', endStroke);
 ui.canvas.addEventListener('pointercancel', endStroke);
 
 document.getElementById('play').addEventListener('click', () => setPlaying(!state.playing));
-document.getElementById('undo').addEventListener('click', () => { state.strokes.pop(); });
-document.getElementById('clear').addEventListener('click', () => { state.strokes = []; stopAllVoices(); });
-document.getElementById('slower').addEventListener('click', () => setBpm(state.bpm - 5));
-document.getElementById('faster').addEventListener('click', () => setBpm(state.bpm + 5));
+document.getElementById('undo').addEventListener('click', () => { state.strokes.pop(); syncUrl(); });
+document.getElementById('clear').addEventListener('click', () => { state.strokes = []; stopAllVoices(); syncUrl(); });
+document.getElementById('share').addEventListener('click', share);
+document.getElementById('slower').addEventListener('click', () => { setBpm(state.bpm - 5); syncUrl(); });
+document.getElementById('faster').addEventListener('click', () => { setBpm(state.bpm + 5); syncUrl(); });
 
 function selectInstrument(i, hear) {
   state.inst = i;
@@ -587,6 +708,11 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden && state.playing) setPlaying(false);
 });
 
+window.addEventListener('hashchange', () => {
+  if (location.href !== drawingUrl()) loadFromUrl();
+});
+
 selectInstrument(state.inst, false);
+if (loadFromUrl()) ui.hint.textContent = 'Tippe ▶ zum Anhören';
 resize();
 requestAnimationFrame(frame);
