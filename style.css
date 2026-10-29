@@ -1,0 +1,120 @@
+:root {
+  --bg: #f6f4f1;
+  --paper: #fdfcfa;
+  --ink: #1d1d1f;
+  --muted: #8a8780;
+  --btn: #ffffff;
+  --btn-border: #e3e0da;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#app {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: max(10px, env(safe-area-inset-top)) 12px max(8px, env(safe-area-inset-bottom));
+  gap: 10px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+#stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  border-radius: 18px;
+  background: var(--paper);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .08), inset 0 0 0 1px var(--btn-border);
+  overflow: hidden;
+}
+
+#canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+#hint {
+  position: absolute;
+  inset: auto 0 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+  pointer-events: none;
+  transition: opacity .4s;
+}
+#hint.hidden { opacity: 0; }
+
+#controls { display: flex; flex-direction: column; gap: 10px; }
+
+.row { display: flex; align-items: center; gap: 8px; }
+.spacer { flex: 1; }
+
+.btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--btn-border);
+  background: var(--btn);
+  color: var(--ink);
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+}
+.btn:active { transform: scale(.94); }
+.btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.btn.small { width: 36px; height: 36px; font-size: 20px; }
+
+.tempo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 24px;
+  border: 1px solid var(--btn-border);
+  background: var(--btn);
+}
+.tempo .btn { border: none; }
+#bpm { min-width: 32px; text-align: center; font-variant-numeric: tabular-nums; font-size: 15px; }
+
+.palette { justify-content: space-between; }
+.swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: 0 0 0 0 var(--ink);
+  transition: box-shadow .15s;
+}
+.swatch.selected { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--ink); }
+
+#info {
+  min-height: 36px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+#info strong { color: var(--ink); margin-right: 6px; }
+
+footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+}
