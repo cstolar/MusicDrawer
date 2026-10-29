@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#f6f4f1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Music Drawer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app">
+    <div id="stage">
+      <canvas id="canvas"></canvas>
+      <div id="hint">Male eine Linie – der Strich wird zur Melodie</div>
+    </div>
+
+    <div id="controls">
+      <div class="row">
+        <button id="play" class="btn" aria-label="Play/Pause">▶</button>
+        <button id="undo" class="btn" aria-label="Rückgängig">↺</button>
+        <button id="clear" class="btn" aria-label="Alles löschen">✕</button>
+        <div class="spacer"></div>
+        <div class="tempo">
+          <button id="slower" class="btn small" aria-label="Langsamer">−</button>
+          <span id="bpm">90</span>
+          <button id="faster" class="btn small" aria-label="Schneller">+</button>
+        </div>
+      </div>
+      <div id="palette" class="row palette"></div>
+      <div id="info">
+        <strong id="instName"></strong>
+        <span id="instFx"></span>
+      </div>
+    </div>
+    <footer>v0.1 Prototyp · Music Drawer</footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
