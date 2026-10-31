@@ -7,6 +7,20 @@
   --btn-border: #e3e0da;
 }
 
+/* Neon-Modus während der Wiedergabe */
+body.playing {
+  --bg: #07070c;
+  --paper: #0c0c14;
+  --ink: #f2f2f7;
+  --muted: #7c7c8a;
+  --btn: #15151e;
+  --btn-border: #262633;
+}
+
+body, #stage, .btn, .tempo, footer, #info {
+  transition: background-color .45s ease, color .45s ease, border-color .45s ease, box-shadow .45s ease;
+}
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html, body {
@@ -77,7 +91,7 @@ html, body {
   cursor: pointer;
 }
 .btn:active { transform: scale(.94); }
-.btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .btn.small { width: 36px; height: 36px; font-size: 20px; }
 
 .tempo {
@@ -100,9 +114,12 @@ html, body {
   border: none;
   padding: 0;
   cursor: pointer;
+  background: var(--c);
   box-shadow: 0 0 0 0 var(--ink);
-  transition: box-shadow .15s;
+  transition: box-shadow .15s, background-color .45s;
 }
+body.playing .swatch { background: var(--n); }
+body.playing .swatch:not(.selected) { box-shadow: 0 0 10px -2px var(--n); }
 .swatch.selected { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--ink); }
 
 #info {
@@ -127,7 +144,7 @@ footer {
   padding: 8px 14px;
   border-radius: 20px;
   background: var(--ink);
-  color: #fff;
+  color: var(--bg);
   font-size: 14px;
   opacity: 0;
   pointer-events: none;

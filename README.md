@@ -8,6 +8,11 @@ jeder geschnittene Strich klingt als Ton (Höhe = Tonhöhe, Farbe = Instrument).
 Reines HTML/CSS/JS mit Web Audio API, kein Build-Schritt. Lokal starten:
 `python3 -m http.server` und http://localhost:8000 öffnen.
 
+## Neon-Modus
+Beim Abspielen färbt sich die App dunkel und die Striche leuchten als Neonröhren
+(farbiger Schein + heller Kern); die Schnittpunkte blitzen in der Instrumentfarbe auf.
+Der Glow wird je Zeichnung einmal in eine Ebene gerendert, nicht in jedem Frame.
+
 ## Teilen
 Die Zeichnung steckt komplett im Link (`#d=<bpm>-<daten>`): Striche werden vereinfacht,
 auf 4096 Stufen je Achse gerundet und binär als Base64 in den URL-Hash geschrieben.
