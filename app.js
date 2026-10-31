@@ -1,6 +1,6 @@
 'use strict';
 
-const APP_VERSION = 'v0.2.1';
+const APP_VERSION = 'v0.3';
 
 // ---------------------------------------------------------------------------
 // Musik-Konstanten (aus der Videoanalyse, siehe docs/ANALYSE.md)
@@ -28,14 +28,14 @@ const yToDegree = (y) => Math.min(ROWS - 1, Math.max(0, Math.floor((1 - y) * ROW
 // ---------------------------------------------------------------------------
 const INSTRUMENTS = [
   {
-    name: 'Marimba', color: '#2e9e5b', fx: 'Lowpass · Ping-Delay · kleiner Raum',
+    name: 'Marimba', color: '#2e9e5b', neon: '#39ff88', fx: 'Lowpass · Ping-Delay · kleiner Raum',
     oscs: [{ type: 'sine', ratio: 1, gain: 1 }, { type: 'sine', ratio: 4, gain: 0.25 }],
     env: { a: 0.004, d: 0.35, s: 0.12, r: 0.25 }, glide: 0.03, octave: 0, gain: 0.9,
     inserts: [{ fx: 'filter', type: 'lowpass', freq: 3200, q: 0.7 }],
     delay: { time: 0.333, feedback: 0.35, mix: 0.28 }, reverb: 0.18,
   },
   {
-    name: 'Acid Lead', color: '#d23a2f', fx: 'Auto-Wah (Resonanzfilter + LFO) · Verzerrung · Delay',
+    name: 'Acid Lead', color: '#d23a2f', neon: '#ff3b5c', fx: 'Auto-Wah (Resonanzfilter + LFO) · Verzerrung · Delay',
     oscs: [{ type: 'sawtooth', ratio: 1, gain: 1 }],
     env: { a: 0.01, d: 0.2, s: 0.7, r: 0.15 }, glide: 0.06, octave: 0, gain: 0.25,
     inserts: [
@@ -45,7 +45,7 @@ const INSTRUMENTS = [
     delay: { time: 0.25, feedback: 0.3, mix: 0.2 }, reverb: 0.12,
   },
   {
-    name: 'Soft Pad', color: '#6c56d6', fx: 'Dreieckswelle (wie im Video) · Chorus · großer Hall',
+    name: 'Soft Pad', color: '#6c56d6', neon: '#a77bff', fx: 'Dreieckswelle (wie im Video) · Chorus · großer Hall',
     oscs: [{ type: 'triangle', ratio: 1, gain: 1 }],
     env: { a: 0.06, d: 0.6, s: 0.75, r: 0.6 }, glide: 0.08, octave: 0, gain: 1.3,
     inserts: [
@@ -55,7 +55,7 @@ const INSTRUMENTS = [
     reverb: 0.4,
   },
   {
-    name: 'Brass', color: '#e8892b', fx: 'Zwei verstimmte Sägezähne · Lowpass · leichte Sättigung',
+    name: 'Brass', color: '#e8892b', neon: '#ffa62b', fx: 'Zwei verstimmte Sägezähne · Lowpass · leichte Sättigung',
     oscs: [{ type: 'sawtooth', ratio: 1, gain: 0.6, detune: -7 }, { type: 'sawtooth', ratio: 1, gain: 0.6, detune: 7 }],
     env: { a: 0.05, d: 0.3, s: 0.65, r: 0.2 }, glide: 0.05, octave: 0, gain: 0.6,
     inserts: [
@@ -65,7 +65,7 @@ const INSTRUMENTS = [
     reverb: 0.2,
   },
   {
-    name: 'Bass', color: '#2f45c4', fx: 'Zwei Oktaven tiefer · Sinus + Dreieck · Röhren-Sättigung · dunkler Lowpass',
+    name: 'Bass', color: '#2f45c4', neon: '#3d7bff', fx: 'Zwei Oktaven tiefer · Sinus + Dreieck · Röhren-Sättigung · dunkler Lowpass',
     // Grundton 2 Oktaven tiefer; die Sättigung erzeugt Obertöne, damit der
     // Bass auch auf Handy-Lautsprechern als Tonhöhe hörbar bleibt.
     oscs: [{ type: 'sine', ratio: 1, gain: 1 }, { type: 'triangle', ratio: 1, gain: 0.45 }],
@@ -77,7 +77,7 @@ const INSTRUMENTS = [
     reverb: 0.04,
   },
   {
-    name: 'Glocke', color: '#d1509f', fx: 'FM-Synthese · Oktave höher · Delay · großer Hall',
+    name: 'Glocke', color: '#d1509f', neon: '#ff4fd8', fx: 'FM-Synthese · Oktave höher · Delay · großer Hall',
     oscs: [{ type: 'sine', ratio: 1, gain: 1 }],
     fm: { ratio: 3.5, index: 2.5, decay: 0.8 },
     env: { a: 0.002, d: 1.2, s: 0.18, r: 0.8 }, glide: 0.02, octave: 12, gain: 0.55,
@@ -85,7 +85,7 @@ const INSTRUMENTS = [
     delay: { time: 0.375, feedback: 0.4, mix: 0.25 }, reverb: 0.45,
   },
   {
-    name: 'Glasflöte', color: '#6fb1e3', fx: 'Sinus mit Vibrato · Highpass · langes Delay · Hall',
+    name: 'Glasflöte', color: '#6fb1e3', neon: '#5ce1ff', fx: 'Sinus mit Vibrato · Highpass · langes Delay · Hall',
     oscs: [{ type: 'sine', ratio: 1, gain: 1 }, { type: 'sine', ratio: 2, gain: 0.12 }],
     vibrato: { rate: 5.2, cents: 18 },
     env: { a: 0.09, d: 0.4, s: 0.85, r: 0.4 }, glide: 0.1, octave: 12, gain: 0.55,
@@ -93,7 +93,7 @@ const INSTRUMENTS = [
     delay: { time: 0.5, feedback: 0.3, mix: 0.25 }, reverb: 0.5,
   },
   {
-    name: '8-Bit', color: '#222222', fx: 'Rechteck · Bitcrusher · keine Glides · Slap-Delay',
+    name: '8-Bit', color: '#222222', neon: '#f2f2ff', fx: 'Rechteck · Bitcrusher · keine Glides · Slap-Delay',
     oscs: [{ type: 'square', ratio: 1, gain: 1 }],
     env: { a: 0.002, d: 0.1, s: 0.6, r: 0.05 }, glide: 0, octave: 0, gain: 0.45,
     inserts: [
@@ -103,7 +103,7 @@ const INSTRUMENTS = [
     delay: { time: 0.166, feedback: 0.25, mix: 0.2 }, reverb: 0.05,
   },
   {
-    name: 'Orgel', color: '#f0a56b', fx: 'Zugriegel 8′ 4′ 2⅔′ · Rotary-Tremolo · Röhren-Sättigung',
+    name: 'Orgel', color: '#f0a56b', neon: '#ffd27a', fx: 'Zugriegel 8′ 4′ 2⅔′ · Rotary-Tremolo · Röhren-Sättigung',
     oscs: [
       { type: 'sine', ratio: 1, gain: 0.8 },
       { type: 'sine', ratio: 2, gain: 0.5 },
@@ -386,6 +386,8 @@ function setPlaying(on) {
   }
   state.playing = on;
   if (on) ui.hint.classList.add('hidden');
+  document.body.classList.toggle('playing', on);
+  ui.themeColor.setAttribute('content', on ? '#07070c' : '#f6f4f1');
   ui.play.textContent = on ? '❚❚' : '▶';
   ui.play.classList.toggle('active', on);
 }
@@ -449,10 +451,13 @@ function simplify(pts, eps) {
   if (pts.length < 3) return pts;
   const a = pts[0], b = pts[pts.length - 1];
   const dx = b.x - a.x, dy = b.y - a.y;
-  const len = Math.hypot(dx, dy) || 1e-9;
+  const len = Math.hypot(dx, dy);
   let maxD = 0, idx = 0;
   for (let i = 1; i < pts.length - 1; i++) {
-    const d = Math.abs(dy * pts[i].x - dx * pts[i].y + b.x * a.y - b.y * a.x) / len;
+    // Geschlossene Striche (Start = Ende): Abstand zum Startpunkt statt zur Linie
+    const d = len < 1e-6
+      ? Math.hypot(pts[i].x - a.x, pts[i].y - a.y)
+      : Math.abs(dy * pts[i].x - dx * pts[i].y + b.x * a.y - b.y * a.x) / len;
     if (d > maxD) { maxD = d; idx = i; }
   }
   if (maxD <= eps) return [a, b];
@@ -570,10 +575,25 @@ const ui = {
   toast: document.getElementById('toast'),
   linkPanel: document.getElementById('linkPanel'),
   linkInput: document.getElementById('linkInput'),
+  themeColor: document.querySelector('meta[name="theme-color"]'),
 };
 const g2d = ui.canvas.getContext('2d');
 let W = 0, H = 0, DPR = 1;
-let gridLayer = null;
+
+// Zwei Looks, zwischen denen beim Abspielen überblendet wird:
+//   hell  = kariertes Papier mit Filzstift-Strichen
+//   neon  = dunkler Hintergrund, Striche leuchten wie Neonröhren
+// Gitter und Striche werden je Look einmal in eine Ebene gerendert und nur
+// neu berechnet, wenn sich etwas ändert (Glow ist auf dem Handy teuer).
+const layers = { gridLight: null, gridDark: null, light: null, neon: null, sig: '' };
+let dark = 0;          // 0 = hell, 1 = neon (animiert)
+let lastFrame = 0;
+
+function makeLayer() {
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  return c;
+}
 
 function resize() {
   DPR = Math.min(window.devicePixelRatio || 1, 3);
@@ -582,64 +602,171 @@ function resize() {
   H = Math.round(r.height * DPR);
   ui.canvas.width = W;
   ui.canvas.height = H;
-  gridLayer = renderGrid();
+  layers.gridLight = renderGrid(['#cfcac2', '#e6e2dc', '#f1eee9']);
+  layers.gridDark = renderGrid(['rgba(255,255,255,.12)', 'rgba(255,255,255,.06)', 'rgba(255,255,255,.025)']);
+  layers.light = makeLayer();
+  layers.neon = makeLayer();
+  layers.sig = '';
 }
 
-function renderGrid() {
-  const c = document.createElement('canvas');
-  c.width = W; c.height = H;
+// shades: [Taktstrich, Hauptlinie, Hilfslinie]
+function renderGrid(shades) {
+  const c = makeLayer();
   const g = c.getContext('2d');
   const sub = 2;
+  g.lineWidth = DPR;
   for (let i = 1; i < COLS * sub; i++) {
     const x = Math.round((i / (COLS * sub)) * W) + 0.5;
-    g.strokeStyle = i % (sub * 8) === 0 ? '#cfcac2' : i % sub === 0 ? '#e6e2dc' : '#f1eee9';
-    g.lineWidth = DPR;
+    g.strokeStyle = i % (sub * 8) === 0 ? shades[0] : i % sub === 0 ? shades[1] : shades[2];
     g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke();
   }
   for (let j = 1; j < ROWS * sub; j++) {
     const y = Math.round((j / (ROWS * sub)) * H) + 0.5;
-    g.strokeStyle = j % sub === 0 ? '#e6e2dc' : '#f1eee9';
-    g.lineWidth = DPR;
+    g.strokeStyle = j % sub === 0 ? shades[1] : shades[2];
     g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
   }
   return c;
 }
 
-function drawStroke(s) {
-  const p = s.pts;
-  if (!p.length) return;
-  g2d.strokeStyle = INSTRUMENTS[s.inst].color;
-  g2d.lineWidth = 3.5 * DPR;
-  g2d.lineCap = 'round';
-  g2d.lineJoin = 'round';
-  g2d.beginPath();
-  g2d.moveTo(p[0].x * W, p[0].y * H);
-  for (let i = 1; i < p.length; i++) g2d.lineTo(p[i].x * W, p[i].y * H);
-  if (p.length === 1) g2d.lineTo(p[0].x * W + 0.1, p[0].y * H);
-  g2d.stroke();
+function tracePath(g, p) {
+  g.beginPath();
+  g.moveTo(p[0].x * W, p[0].y * H);
+  for (let i = 1; i < p.length; i++) g.lineTo(p[i].x * W, p[i].y * H);
+  if (p.length === 1) g.lineTo(p[0].x * W + 0.1, p[0].y * H);
 }
 
-function frame() {
+function drawStrokeLight(g, s) {
+  if (!s.pts.length) return;
+  g.strokeStyle = INSTRUMENTS[s.inst].color;
+  g.lineWidth = 3.5 * DPR;
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+  tracePath(g, s.pts);
+  g.stroke();
+}
+
+// Neonröhre: breiter farbiger Schein + heller, fast weißer Kern
+function drawStrokeNeon(g, s) {
+  if (!s.pts.length) return;
+  const neon = INSTRUMENTS[s.inst].neon;
+  g.save();
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+  g.globalCompositeOperation = 'lighter';
+  tracePath(g, s.pts);
+  g.shadowColor = neon;
+  g.strokeStyle = neon;
+  g.globalAlpha = 0.55;
+  g.shadowBlur = 22 * DPR;
+  g.lineWidth = 6 * DPR;
+  g.stroke();
+  g.globalAlpha = 0.9;
+  g.shadowBlur = 8 * DPR;
+  g.lineWidth = 3.2 * DPR;
+  g.stroke();
+  g.globalAlpha = 1;
+  g.shadowBlur = 3 * DPR;
+  g.strokeStyle = mixWhite(neon, 0.7);
+  g.lineWidth = 1.4 * DPR;
+  g.stroke();
+  g.restore();
+}
+
+// Günstige Variante für den Strich, der gerade gezeichnet wird: halbtransparente
+// Lagen statt Weichzeichner, damit das Zeichnen auch auf schwachen Handys flüssig bleibt
+function drawStrokeNeonFast(g, s) {
+  if (!s.pts.length) return;
+  const neon = INSTRUMENTS[s.inst].neon;
+  g.save();
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+  tracePath(g, s.pts);
+  g.strokeStyle = neon;
+  g.globalAlpha = 0.18;
+  g.lineWidth = 12 * DPR;
+  g.stroke();
+  g.globalAlpha = 0.45;
+  g.lineWidth = 6 * DPR;
+  g.stroke();
+  g.globalAlpha = 1;
+  g.strokeStyle = mixWhite(neon, 0.7);
+  g.lineWidth = 2 * DPR;
+  g.stroke();
+  g.restore();
+}
+
+function mixWhite(hex, t) {
+  const n = parseInt(hex.slice(1), 16);
+  const ch = (v) => Math.round(v + (255 - v) * t);
+  return `rgb(${ch(n >> 16)}, ${ch((n >> 8) & 255)}, ${ch(n & 255)})`;
+}
+
+// Strich-Ebenen nur neu rendern, wenn sich die Zeichnung geändert hat
+function refreshStrokeLayers() {
+  const last = state.strokes[state.strokes.length - 1];
+  const sig = state.strokes.length + ':' + (last ? last.id : 0);
+  if (sig === layers.sig) return;
+  layers.sig = sig;
+  const gl = layers.light.getContext('2d');
+  const gn = layers.neon.getContext('2d');
+  gl.clearRect(0, 0, W, H);
+  gn.clearRect(0, 0, W, H);
+  for (const s of state.strokes) {
+    drawStrokeLight(gl, s);
+    drawStrokeNeon(gn, s);
+  }
+}
+
+function frame(now) {
+  const dt = Math.min(0.1, (now - lastFrame) / 1000 || 0);
+  lastFrame = now;
+  dark += ((state.playing ? 1 : 0) - dark) * Math.min(1, dt * 6);
+  if (Math.abs(dark - (state.playing ? 1 : 0)) < 0.002) dark = state.playing ? 1 : 0;
+
   const pos = playheadPos();
   const hits = state.playing ? intersections(pos) : [];
   if (state.playing) updateVoices(hits);
 
+  refreshStrokeLayers();
   g2d.clearRect(0, 0, W, H);
-  g2d.drawImage(gridLayer, 0, 0);
-  state.strokes.forEach(drawStroke);
-  if (state.current) drawStroke(state.current);
+  if (dark < 1) {
+    g2d.globalAlpha = 1 - dark;
+    g2d.drawImage(layers.gridLight, 0, 0);
+    g2d.drawImage(layers.light, 0, 0);
+  }
+  if (dark > 0) {
+    g2d.globalAlpha = dark;
+    g2d.drawImage(layers.gridDark, 0, 0);
+    g2d.drawImage(layers.neon, 0, 0);
+  }
+  g2d.globalAlpha = 1;
+  if (state.current) {
+    if (dark > 0.5) drawStrokeNeonFast(g2d, state.current);
+    else drawStrokeLight(g2d, state.current);
+  }
 
   const x = pos * W;
-  g2d.strokeStyle = '#1d1d1f';
+  const neonMode = dark > 0.5;
+  g2d.save();
+  g2d.strokeStyle = neonMode ? 'rgba(255,255,255,.85)' : '#1d1d1f';
   g2d.lineWidth = 1.5 * DPR;
+  if (neonMode) { g2d.shadowColor = '#ffffff'; g2d.shadowBlur = 10 * DPR; }
   g2d.beginPath(); g2d.moveTo(x, 0); g2d.lineTo(x, H); g2d.stroke();
 
-  g2d.fillStyle = '#1d1d1f';
+  // Schnittpunkte: im Neon-Modus blitzen sie in der Farbe des Instruments auf
   for (const h of hits) {
     g2d.beginPath();
-    g2d.arc(x, h.y * H, 4.5 * DPR, 0, Math.PI * 2);
+    g2d.arc(x, h.y * H, (neonMode ? 4 : 4.5) * DPR, 0, Math.PI * 2);
+    if (neonMode) {
+      g2d.shadowColor = INSTRUMENTS[h.inst].neon;
+      g2d.shadowBlur = 18 * DPR;
+      g2d.fillStyle = '#ffffff';
+    } else {
+      g2d.fillStyle = '#1d1d1f';
+    }
     g2d.fill();
   }
+  g2d.restore();
   requestAnimationFrame(frame);
 }
 
@@ -718,7 +845,8 @@ function selectInstrument(i, hear) {
 INSTRUMENTS.forEach((inst, i) => {
   const b = document.createElement('button');
   b.className = 'swatch';
-  b.style.background = inst.color;
+  b.style.setProperty('--c', inst.color);
+  b.style.setProperty('--n', inst.neon);
   b.setAttribute('aria-label', inst.name);
   b.addEventListener('click', () => selectInstrument(i, true));
   ui.palette.appendChild(b);
